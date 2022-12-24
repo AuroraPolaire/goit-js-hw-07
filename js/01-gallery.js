@@ -2,7 +2,6 @@ import { galleryItems } from "./gallery-items.js";
 
 const galleryEl = document.querySelector(".gallery");
 const markup = createGalleryItem(galleryItems);
-let instance = null;
 
 galleryEl.innerHTML = markup;
 
@@ -23,6 +22,16 @@ function createGalleryItem(galleryItems) {
     .join("");
 }
 
+const instance = basicLightbox.create(`<img class="modal-img src="">`, {
+  onShow: (instance) => {
+    window.addEventListener("keydown", onEscCloseModal);
+  },
+
+  onClose: (instance) => {
+    window.removeEventListener("keydown", onEscCloseModal);
+  },
+});
+
 function onClickOpenPicture(event) {
   const { target } = event;
   event.preventDefault();
@@ -31,11 +40,7 @@ function onClickOpenPicture(event) {
     return;
   }
 
-  const chosenPicture = target.dataset.source;
-
-  instance = basicLightbox.create(`
-    <img src="${chosenPicture}" width="800" height="600">
-  `);
+  instance.element().querySelector("img").src = target.dataset.source;
 
   instance.show();
 }
@@ -43,9 +48,8 @@ function onClickOpenPicture(event) {
 galleryEl.addEventListener("click", onClickOpenPicture);
 
 function onEscCloseModal(event) {
-  if (event.key === "Escape" && instance.visible()) {
+  if (event.key === "Escape") {
     instance.close();
+    return;
   }
 }
-
-document.addEventListener("keydown", onEscCloseModal);
